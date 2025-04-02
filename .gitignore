@@ -1,3 +1,6 @@
+# Credentials
+credentials.yml
+
 # Compiled class file
 *.class
 
@@ -57,3 +60,7 @@ spring-boot-devtools.properties
 
 # Windows
 Thumbs.db
+
+# vi swap file
+.swp
+

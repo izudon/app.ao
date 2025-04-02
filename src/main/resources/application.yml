@@ -1,0 +1,10 @@
+spring:
+  config:
+    import: classpath:credentials.yml
+jwt:
+  secret-key:
+  expiration-ms: 1500000 # 25 min.
+server:
+  address:
+  port:
+  forward-headers-strategy: framework
