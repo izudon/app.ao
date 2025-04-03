@@ -1,4 +1,4 @@
-package com.incrage.ao.app;
+package com.incrage.ao.common;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

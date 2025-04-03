@@ -10,6 +10,8 @@ import org.springframework.security
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.incrage.ao.common.JwtTokenProvider;
+
 import jakarta.servlet.http.Cookie;
 
 import static org.springframework.test.web.servlet.request

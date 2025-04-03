@@ -16,6 +16,8 @@ import org.springframework.security
     .config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security
     .config.annotation.web.configurers.LogoutConfigurer;
+import com.incrage.ao.common.JwtAuthenticationFilter;
+import com.incrage.ao.common.JwtAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity

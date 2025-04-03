@@ -1,4 +1,4 @@
-package com.incrage.ao.app;
+package com.incrage.ao.common;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
