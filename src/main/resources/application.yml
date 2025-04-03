@@ -3,6 +3,7 @@ spring:
     import: classpath:credentials.yml
 jwt:
   secret-key:
+  secret-key-spare:
   expiration-ms: 1500000 # 25 min.
 server:
   address:

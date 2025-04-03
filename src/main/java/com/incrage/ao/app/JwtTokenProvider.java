@@ -18,19 +18,23 @@ import java.util.List;
 @Component
 public class JwtTokenProvider {
 
-    private final Key secretKey;
+    private final Key primaryKey;
+    private final Key spareKey;
     private final long expirationMs;
 
     public JwtTokenProvider(
         @Value("${jwt.secret-key}") String secret,
+        @Value("${jwt.secret-key-spare}") String spare,
         @Value("${jwt.expiration-ms}") long expirationMs
     ) {
-        this.secretKey
+        this.primaryKey
 	    = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.spareKey
+	    = Keys.hmacShaKeyFor(spare.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
     }
 
-    // 認証（Authentication）オブジェクトからトークンを作成
+    // トークン作成は primaryKey のみ使用
     public String createToken(Authentication authentication) {
         String subject = authentication.getName();
         Date now = new Date();
@@ -40,11 +44,10 @@ public class JwtTokenProvider {
                 .setSubject(subject)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .signWith(primaryKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // リクエストからトークンを取り出す（from Cookie with name "JWT_TOKEN"）
     public String resolveToken(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         for (Cookie cookie : request.getCookies()) {
@@ -55,28 +58,35 @@ public class JwtTokenProvider {
         return null;
     }
 
-    // トークンを検証（署名・有効期限）
     public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(secretKey)
-		.build().parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+        return parseClaims(token) != null;
     }
 
-    // トークンから認証情報を取り出す（ここでは簡易的に username のみ使用）
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        Claims claims = parseClaims(token);
+        if (claims == null) throw new JwtException("Invalid token");
 
         String username = claims.getSubject();
         User principal = new User(username, "", List.of());
         return new UsernamePasswordAuthenticationToken
 	    (principal, token, principal.getAuthorities());
+    }
+
+    private Claims parseClaims(String token) {
+	List<Key> keys = List.of(primaryKey, spareKey);
+
+	for (Key key : keys) {
+	    try {
+		return Jwts.parserBuilder()
+		    .setSigningKey(key)
+		    .build()
+		    .parseClaimsJws(token)
+		    .getBody();
+	    } catch (JwtException | IllegalArgumentException ignored) {
+		// 次の鍵に進む
+	    }
+	}
+
+	return null; // どの鍵でも検証できなかった場合
     }
 }
