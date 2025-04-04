@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: dev
   config:
     import: classpath:credentials.yml
 server:
